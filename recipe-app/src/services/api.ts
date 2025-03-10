@@ -28,7 +28,6 @@ export const api = {
         .flat()
         .filter(
           (recipe, index, self) =>
-            // Remove duplicates based on idMeal
             index === self.findIndex((r) => r.idMeal === recipe.idMeal)
         );
 
@@ -59,7 +58,6 @@ export const api = {
     );
     if (!response.data.meals) return [];
 
-    // Get full details for the first 20 recipes to show more variety
     const recipes = response.data.meals.slice(0, 20);
     const fullRecipesPromises = recipes.map((recipe: SimplifiedRecipe) =>
       this.getRecipeById(recipe.idMeal)
@@ -72,7 +70,6 @@ export const api = {
     const response = await axios.get(`${API.BASE_URL}/filter.php?a=${area}`);
     if (!response.data.meals) return [];
 
-    // Get full details for the first 20 recipes to show more variety
     const recipes = response.data.meals.slice(0, 20);
     const fullRecipesPromises = recipes.map((recipe: SimplifiedRecipe) =>
       this.getRecipeById(recipe.idMeal)
