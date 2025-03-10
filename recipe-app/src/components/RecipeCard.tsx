@@ -1,5 +1,6 @@
 import React from "react";
 import { Recipe } from "../types/recipe";
+import { useNavigate } from "react-router-dom";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -8,8 +9,14 @@ interface RecipeCardProps {
 }
 
 export function RecipeCard({ recipe, onSelect, isSelected }: RecipeCardProps) {
+  const navigate = useNavigate();
+
   return (
-    <div className="card">
+    <div
+      className="card"
+      onClick={() => navigate(`/recipe/${recipe.idMeal}`)}
+      style={{ cursor: "pointer" }}
+    >
       <div style={{ position: "relative" }}>
         <img
           src={recipe.strMealThumb}
@@ -107,7 +114,10 @@ export function RecipeCard({ recipe, onSelect, isSelected }: RecipeCardProps) {
         </div>
         {onSelect && (
           <button
-            onClick={() => onSelect(recipe.idMeal)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(recipe.idMeal);
+            }}
             className="button"
             style={{
               position: "absolute",
