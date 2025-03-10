@@ -13,6 +13,7 @@ const ITEMS_PER_PAGE = 9;
 export function RecipeList() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  const [area, setArea] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRecipes, setSelectedRecipes] = useState<Set<string>>(() => {
     const saved = localStorage.getItem("selectedRecipes");
@@ -26,13 +27,16 @@ export function RecipeList() {
     isLoading: recipesLoading,
     isError: recipesError,
   } = useQuery<Recipe[]>({
-    queryKey: ["recipes", debouncedSearch, category],
+    queryKey: ["recipes", debouncedSearch, category, area],
     queryFn: async () => {
       if (debouncedSearch) {
         return api.getRecipes(debouncedSearch);
       }
       if (category) {
         return api.getRecipesByCategory(category);
+      }
+      if (area) {
+        return api.getRecipesByArea(area);
       }
       return api.getRecipes();
     },
@@ -47,6 +51,12 @@ export function RecipeList() {
     staleTime: 1000 * 60 * 60, // Cache categories for 1 hour
   });
 
+  const { data: areas = [], isLoading: areasLoading } = useQuery<string[]>({
+    queryKey: ["areas"],
+    queryFn: api.getAreas,
+    staleTime: 1000 * 60 * 60, // Cache areas for 1 hour
+  });
+
   useEffect(() => {
     localStorage.setItem(
       "selectedRecipes",
@@ -56,7 +66,7 @@ export function RecipeList() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, category]);
+  }, [debouncedSearch, category, area]);
 
   const totalPages = Math.ceil(recipes.length / ITEMS_PER_PAGE);
   const paginatedRecipes = recipes.slice(
@@ -125,6 +135,7 @@ export function RecipeList() {
                     onChange={(e) => {
                       setSearch(e.target.value);
                       setCategory("");
+                      setArea("");
                     }}
                     style={{
                       width: "90%",
@@ -139,6 +150,7 @@ export function RecipeList() {
                   onChange={(e) => {
                     setCategory(e.target.value);
                     setSearch("");
+                    setArea("");
                   }}
                   style={{
                     fontSize: "1.125rem",
@@ -150,6 +162,27 @@ export function RecipeList() {
                   {categories.map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="input"
+                  value={area}
+                  onChange={(e) => {
+                    setArea(e.target.value);
+                    setSearch("");
+                    setCategory("");
+                  }}
+                  style={{
+                    fontSize: "1.125rem",
+                    width: "200px",
+                    flexShrink: 0,
+                  }}
+                >
+                  <option value="">All Countries</option>
+                  {areas.map((a) => (
+                    <option key={a} value={a}>
+                      {a}
                     </option>
                   ))}
                 </select>

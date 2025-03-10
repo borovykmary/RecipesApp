@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../services/api";
@@ -11,9 +11,10 @@ import YouTubeIcon from "@mui/icons-material/YouTube";
 export function RecipeDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const selectedRecipeIds = JSON.parse(
-    localStorage.getItem("selectedRecipes") || "[]"
-  );
+  const [selectedRecipes, setSelectedRecipes] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem("selectedRecipes");
+    return new Set(saved ? JSON.parse(saved) : []);
+  });
 
   const { data: recipe, isLoading } = useQuery({
     queryKey: ["recipe", id],
@@ -21,10 +22,27 @@ export function RecipeDetails() {
     enabled: !!id,
   });
 
+  useEffect(() => {
+    localStorage.setItem(
+      "selectedRecipes",
+      JSON.stringify(Array.from(selectedRecipes))
+    );
+  }, [selectedRecipes]);
+
+  const toggleRecipeSelection = (recipeId: string) => {
+    const newSelected = new Set(selectedRecipes);
+    if (newSelected.has(recipeId)) {
+      newSelected.delete(recipeId);
+    } else {
+      newSelected.add(recipeId);
+    }
+    setSelectedRecipes(newSelected);
+  };
+
   if (isLoading) {
     return (
       <>
-        <Navigation selectedRecipesCount={selectedRecipeIds.length} />
+        <Navigation selectedRecipesCount={selectedRecipes.size} />
         <main style={{ paddingTop: "80px" }}>
           <div className="container">
             <div style={{ padding: "48px 0" }}>
@@ -41,7 +59,7 @@ export function RecipeDetails() {
   if (!recipe) {
     return (
       <>
-        <Navigation selectedRecipesCount={selectedRecipeIds.length} />
+        <Navigation selectedRecipesCount={selectedRecipes.size} />
         <main style={{ paddingTop: "80px" }}>
           <div className="container">
             <div style={{ padding: "48px 0" }}>
@@ -66,7 +84,7 @@ export function RecipeDetails() {
 
   return (
     <>
-      <Navigation selectedRecipesCount={selectedRecipeIds.length} />
+      <Navigation selectedRecipesCount={selectedRecipes.size} />
       <main style={{ paddingTop: "80px" }}>
         <div className="container">
           <div style={{ padding: "48px 0" }}>
@@ -174,23 +192,46 @@ export function RecipeDetails() {
               </div>
 
               <div>
-                <h1
-                  style={{
-                    fontSize: "3rem",
-                    marginBottom: "24px",
-                    color: "white",
-                    fontFamily: "Playfair Display, serif",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "-webkit-box",
-                    WebkitLineClamp: "2",
-                    WebkitBoxOrient: "vertical",
-                    lineHeight: 1.2,
-                  }}
-                  title={recipe.strMeal}
-                >
-                  {recipe.strMeal}
-                </h1>
+                <div style={{ marginBottom: "16px" }}>
+                  <h1
+                    style={{
+                      fontSize: "3rem",
+                      marginBottom: "16px",
+                      color: "white",
+                      fontFamily: "Playfair Display, serif",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: "2",
+                      WebkitBoxOrient: "vertical",
+                      lineHeight: 1.2,
+                    }}
+                    title={recipe.strMeal}
+                  >
+                    {recipe.strMeal}
+                  </h1>
+                  <button
+                    onClick={() => toggleRecipeSelection(recipe.idMeal)}
+                    className="button"
+                    style={{
+                      padding: "8px 16px",
+                      backgroundColor: selectedRecipes.has(recipe.idMeal)
+                        ? "var(--color-primary)"
+                        : "rgba(255, 255, 255, 0.2)",
+                      color: selectedRecipes.has(recipe.idMeal)
+                        ? "var(--color-secondary)"
+                        : "white",
+                      fontSize: "0.875rem",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease-in-out",
+                      backdropFilter: "blur(4px)",
+                    }}
+                  >
+                    {selectedRecipes.has(recipe.idMeal) ? "Selected" : "Select"}
+                  </button>
+                </div>
 
                 <div style={{ marginBottom: "32px" }}>
                   <h2

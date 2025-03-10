@@ -48,10 +48,28 @@ export const api = {
     );
   },
 
+  async getAreas() {
+    const response = await axios.get(`${API.BASE_URL}/list.php?a=list`);
+    return response.data.meals.map((area: { strArea: string }) => area.strArea);
+  },
+
   async getRecipesByCategory(category: string): Promise<Recipe[]> {
     const response = await axios.get(
       `${API.BASE_URL}/filter.php?c=${category}`
     );
+    if (!response.data.meals) return [];
+
+    // Get full details for the first 20 recipes to show more variety
+    const recipes = response.data.meals.slice(0, 20);
+    const fullRecipesPromises = recipes.map((recipe: SimplifiedRecipe) =>
+      this.getRecipeById(recipe.idMeal)
+    );
+    const fullRecipes = await Promise.all(fullRecipesPromises);
+    return fullRecipes.filter((recipe): recipe is Recipe => recipe !== null);
+  },
+
+  async getRecipesByArea(area: string): Promise<Recipe[]> {
+    const response = await axios.get(`${API.BASE_URL}/filter.php?a=${area}`);
     if (!response.data.meals) return [];
 
     // Get full details for the first 20 recipes to show more variety
