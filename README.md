@@ -46,11 +46,9 @@ A modern web application for searching and managing recipes using TheMealDB API.
      - Recipe image
      - YouTube video (if available)
 
-3. **Favorite Recipes Page**
-   - Manages selected recipes
+3. **Basket Page**
+   - Displayes selected recipes
    - Displays combined ingredients list
-   - Shows cooking instructions for all selected recipes
-   - Calculates total ingredients needed
 
 ## 🚀 Getting Started
 
@@ -120,7 +118,3 @@ This project uses [TheMealDB API](https://www.themealdb.com/api.php) for fetchin
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
-## 📜 License
-
-This project is licensed under the MIT License - see the LICENSE file for details
