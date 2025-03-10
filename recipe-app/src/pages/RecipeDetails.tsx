@@ -3,10 +3,17 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../services/api";
 import { Navigation } from "../components/Navigation";
+import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
+import LayersIcon from "@mui/icons-material/Layers";
+import LanguageIcon from "@mui/icons-material/Language";
+import YouTubeIcon from "@mui/icons-material/YouTube";
 
 export function RecipeDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const selectedRecipeIds = JSON.parse(
+    localStorage.getItem("selectedRecipes") || "[]"
+  );
 
   const { data: recipe, isLoading } = useQuery({
     queryKey: ["recipe", id],
@@ -17,7 +24,7 @@ export function RecipeDetails() {
   if (isLoading) {
     return (
       <>
-        <Navigation selectedRecipesCount={0} />
+        <Navigation selectedRecipesCount={selectedRecipeIds.length} />
         <main style={{ paddingTop: "80px" }}>
           <div className="container">
             <div style={{ padding: "48px 0" }}>
@@ -34,7 +41,7 @@ export function RecipeDetails() {
   if (!recipe) {
     return (
       <>
-        <Navigation selectedRecipesCount={0} />
+        <Navigation selectedRecipesCount={selectedRecipeIds.length} />
         <main style={{ paddingTop: "80px" }}>
           <div className="container">
             <div style={{ padding: "48px 0" }}>
@@ -48,7 +55,6 @@ export function RecipeDetails() {
     );
   }
 
-  // Extract ingredients and measurements
   const ingredients = [];
   for (let i = 1; i <= 20; i++) {
     const ingredient = recipe[`strIngredient${i}` as keyof typeof recipe];
@@ -60,7 +66,7 @@ export function RecipeDetails() {
 
   return (
     <>
-      <Navigation selectedRecipesCount={0} />
+      <Navigation selectedRecipesCount={selectedRecipeIds.length} />
       <main style={{ paddingTop: "80px" }}>
         <div className="container">
           <div style={{ padding: "48px 0" }}>
@@ -87,19 +93,8 @@ export function RecipeDetails() {
                 e.currentTarget.style.transform = "none";
               }}
             >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-              Back to recipes
+              <KeyboardBackspaceIcon />
+              Go Back
             </button>
 
             <div
@@ -128,30 +123,52 @@ export function RecipeDetails() {
                     flexWrap: "wrap",
                   }}
                 >
-                  <div
-                    style={{
-                      backgroundColor: "var(--color-primary)",
-                      color: "var(--color-secondary)",
-                      padding: "8px 16px",
-                      borderRadius: "8px",
-                      fontSize: "1rem",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {recipe.strCategory}
-                  </div>
-                  <div
-                    style={{
-                      backgroundColor: "rgba(255, 255, 255, 0.1)",
-                      color: "white",
-                      padding: "8px 16px",
-                      borderRadius: "8px",
-                      fontSize: "1rem",
-                      fontWeight: 500,
-                      backdropFilter: "blur(4px)",
-                    }}
-                  >
-                    {recipe.strArea}
+                  <div style={{ display: "flex", gap: "12px" }}>
+                    <div
+                      style={{
+                        backgroundColor: "var(--color-primary)",
+                        color: "var(--color-secondary)",
+                        padding: "6px 12px",
+                        borderRadius: "4px",
+                        fontSize: "0.875rem",
+                        fontWeight: 500,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                        maxWidth: "100px",
+                      }}
+                      title={recipe.strCategory}
+                    >
+                      <LayersIcon sx={{ fontSize: 16 }} />
+                      <span
+                        style={{
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {recipe.strCategory}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        backgroundColor: "rgba(255, 255, 255, 0.15)",
+                        color: "white",
+                        padding: "6px 12px",
+                        borderRadius: "4px",
+                        fontSize: "0.875rem",
+                        fontWeight: 500,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                        backdropFilter: "blur(4px)",
+                      }}
+                    >
+                      <LanguageIcon sx={{ fontSize: 16 }} />
+                      {recipe.strArea}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -163,7 +180,14 @@ export function RecipeDetails() {
                     marginBottom: "24px",
                     color: "white",
                     fontFamily: "Playfair Display, serif",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box",
+                    WebkitLineClamp: "2",
+                    WebkitBoxOrient: "vertical",
+                    lineHeight: 1.2,
                   }}
+                  title={recipe.strMeal}
                 >
                   {recipe.strMeal}
                 </h1>
@@ -259,7 +283,9 @@ export function RecipeDetails() {
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
-                        display: "inline-block",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "8px",
                         backgroundColor: "var(--color-primary)",
                         color: "var(--color-secondary)",
                         padding: "12px 24px",
@@ -276,6 +302,7 @@ export function RecipeDetails() {
                         ((e.target as HTMLElement).style.transform = "none")
                       }
                     >
+                      <YouTubeIcon />
                       Watch on YouTube
                     </a>
                   </div>

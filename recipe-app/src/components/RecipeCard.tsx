@@ -1,6 +1,8 @@
 import React from "react";
 import { Recipe } from "../types/recipe";
 import { useNavigate } from "react-router-dom";
+import LayersIcon from "@mui/icons-material/Layers";
+import LanguageIcon from "@mui/icons-material/Language";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -65,18 +67,7 @@ export function RecipeCard({ recipe, onSelect, isSelected }: RecipeCardProps) {
                 boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
               }}
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
+              <LayersIcon sx={{ fontSize: 16 }} />
               {recipe.strCategory}
             </div>
             <div
@@ -94,20 +85,7 @@ export function RecipeCard({ recipe, onSelect, isSelected }: RecipeCardProps) {
                 backdropFilter: "blur(4px)",
               }}
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-                <path d="M2 12h20" />
-              </svg>
+              <LanguageIcon sx={{ fontSize: 16 }} />
               {recipe.strArea}
             </div>
           </div>

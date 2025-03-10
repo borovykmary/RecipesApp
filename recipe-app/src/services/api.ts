@@ -1,29 +1,65 @@
 import axios from "axios";
 import { API } from "../constants/apiConfig";
+import { Recipe } from "../types/recipe";
+
+interface SimplifiedRecipe {
+  idMeal: string;
+  strMeal: string;
+  strMealThumb: string;
+}
 
 export const api = {
   async getRecipes(search?: string) {
-    const response = await axios.get(
-      search
-        ? `${API.BASE_URL}${API.ENDPOINTS.SEARCH}?${API.PARAMS.SEARCH}=${search}`
-        : `${API.BASE_URL}${API.ENDPOINTS.SEARCH}?${API.PARAMS.SEARCH}=`
-    );
-    return response.data.meals || [];
+    if (search) {
+      const response = await axios.get(
+        `${API.BASE_URL}/search.php?s=${search}`
+      );
+      return response.data.meals || [];
+    } else {
+      // If no search term, get recipes for each letter to get a complete list
+      const letters = "abcdefghijklmnopqrstuvwxyz".split("");
+      const recipesPromises = letters.map((letter) =>
+        axios.get(`${API.BASE_URL}/search.php?f=${letter}`)
+      );
+
+      const responses = await Promise.all(recipesPromises);
+      const allRecipes = responses
+        .map((response) => response.data.meals || [])
+        .flat()
+        .filter(
+          (recipe, index, self) =>
+            // Remove duplicates based on idMeal
+            index === self.findIndex((r) => r.idMeal === recipe.idMeal)
+        );
+
+      return allRecipes;
+    }
   },
 
   async getRecipeById(id: string) {
-    const response = await axios.get(
-      `${API.BASE_URL}${API.ENDPOINTS.LOOKUP}?${API.PARAMS.ID}=${id}`
-    );
+    const response = await axios.get(`${API.BASE_URL}/lookup.php?i=${id}`);
     return response.data.meals?.[0] || null;
   },
 
   async getCategories() {
-    const response = await axios.get(
-      `${API.BASE_URL}${API.ENDPOINTS.CATEGORIES}?${API.PARAMS.CATEGORY}=list`
-    );
-    return response.data.meals.map(
+    const response = await axios.get(`${API.BASE_URL}/categories.php`);
+    return response.data.categories.map(
       (category: { strCategory: string }) => category.strCategory
     );
+  },
+
+  async getRecipesByCategory(category: string): Promise<Recipe[]> {
+    const response = await axios.get(
+      `${API.BASE_URL}/filter.php?c=${category}`
+    );
+    if (!response.data.meals) return [];
+
+    // Get full details for the first 20 recipes to show more variety
+    const recipes = response.data.meals.slice(0, 20);
+    const fullRecipesPromises = recipes.map((recipe: SimplifiedRecipe) =>
+      this.getRecipeById(recipe.idMeal)
+    );
+    const fullRecipes = await Promise.all(fullRecipesPromises);
+    return fullRecipes.filter((recipe): recipe is Recipe => recipe !== null);
   },
 };

@@ -1,5 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
+import FastfoodIcon from "@mui/icons-material/Fastfood";
 
 interface NavigationProps {
   selectedRecipesCount: number;
@@ -38,49 +40,45 @@ export function Navigation({ selectedRecipesCount }: NavigationProps) {
             fontWeight: 700,
           }}
         >
-          Recipes for You
+          Recipes for You <FastfoodIcon />
         </Link>
 
-        <div
+        <Link
+          to="/basket"
           style={{
-            padding: "8px 16px",
-            borderRadius: "8px",
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            transition: "all 0.2s ease-in-out",
+            textDecoration: "none",
+            color: "white",
+            position: "relative",
           }}
         >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <div
+            style={{
+              padding: "8px 16px",
+              borderRadius: "8px",
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              transition: "all 0.2s ease-in-out",
+            }}
           >
-            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <path d="M16 10a4 4 0 0 1-8 0" />
-          </svg>
-          {selectedRecipesCount > 0 && (
-            <span
-              style={{
-                backgroundColor: "var(--color-primary)",
-                color: "var(--color-secondary)",
-                borderRadius: "20px",
-                padding: "2px 8px",
-                fontSize: "0.875rem",
-                fontWeight: 600,
-              }}
-            >
-              {selectedRecipesCount}
-            </span>
-          )}
-        </div>
+            <ShoppingBasketIcon />
+            {selectedRecipesCount > 0 && (
+              <span
+                style={{
+                  backgroundColor: "var(--color-primary)",
+                  color: "var(--color-secondary)",
+                  borderRadius: "20px",
+                  padding: "2px 8px",
+                  fontSize: "0.875rem",
+                  fontWeight: 600,
+                }}
+              >
+                {selectedRecipesCount}
+              </span>
+            )}
+          </div>
+        </Link>
       </div>
     </nav>
   );
