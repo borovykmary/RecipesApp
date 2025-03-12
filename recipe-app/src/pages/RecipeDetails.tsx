@@ -12,21 +12,31 @@ import { IngredientsList } from "../components/IngredientsList";
 const styles = {
   heading: {
     fontSize: "3rem",
-    marginBottom: "16px",
+    marginBottom: "24px",
     color: "white",
     fontFamily: "Playfair Display, serif",
+    lineHeight: 1.2,
   },
   categories: {
     display: "flex",
     gap: "12px",
-    color: "var(--color-gray-300)",
-    fontSize: "1.125rem",
+    marginTop: "24px",
   },
   content: {
     display: "grid",
     gridTemplateColumns: "1fr 1.5fr",
     gap: "48px",
     alignItems: "start",
+  },
+  leftColumn: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "24px",
+  },
+  rightColumn: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "48px",
   },
   imageContainer: {
     position: "sticky" as const,
@@ -53,7 +63,7 @@ const styles = {
     lineHeight: "1.6",
     display: "flex",
     flexDirection: "column" as const,
-    gap: "16px",
+    gap: "8px",
   },
   videoContainer: {
     position: "relative" as const,
@@ -200,11 +210,15 @@ export function RecipeDetails() {
                 Go Back
               </button>
 
-              <div style={{ marginBottom: "48px" }}>
-                <h1 style={styles.heading}>{recipe.strMeal}</h1>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "16px" }}
-                >
+              <div style={styles.content}>
+                <div style={styles.leftColumn}>
+                  <div style={styles.imageContainer}>
+                    <img
+                      src={recipe.strMealThumb}
+                      alt={recipe.strMeal}
+                      style={styles.image}
+                    />
+                  </div>
                   <div style={styles.categories}>
                     <div style={styles.categoryBadge}>
                       <LayersIcon sx={{ fontSize: 16 }} />
@@ -215,32 +229,26 @@ export function RecipeDetails() {
                       <span>{recipe.strArea}</span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => toggleRecipeSelection(recipe.idMeal)}
-                    style={{
-                      ...styles.selectButton,
-                      ...(selectedRecipes.has(recipe.idMeal)
-                        ? styles.selectedButton
-                        : {}),
-                    }}
-                  >
-                    {selectedRecipes.has(recipe.idMeal)
-                      ? "Selected"
-                      : "Select Recipe"}
-                  </button>
-                </div>
-              </div>
-
-              <div style={styles.content}>
-                <div style={styles.imageContainer}>
-                  <img
-                    src={recipe.strMealThumb}
-                    alt={recipe.strMeal}
-                    style={styles.image}
-                  />
                 </div>
 
-                <div style={styles.details}>
+                <div style={styles.rightColumn}>
+                  <div>
+                    <h1 style={styles.heading}>{recipe.strMeal}</h1>
+                    <button
+                      onClick={() => toggleRecipeSelection(recipe.idMeal)}
+                      style={{
+                        ...styles.selectButton,
+                        ...(selectedRecipes.has(recipe.idMeal)
+                          ? styles.selectedButton
+                          : {}),
+                      }}
+                    >
+                      {selectedRecipes.has(recipe.idMeal)
+                        ? "Selected"
+                        : "Select Recipe"}
+                    </button>
+                  </div>
+
                   <section>
                     <h2 style={styles.sectionHeading}>Ingredients</h2>
                     <IngredientsList recipe={recipe} />
@@ -251,6 +259,7 @@ export function RecipeDetails() {
                     <div style={styles.instructions}>
                       {recipe.strInstructions
                         .split("\n")
+                        .filter((step: string) => step.trim() !== "")
                         .map((step: string, index: number) => (
                           <p key={index}>{step}</p>
                         ))}
