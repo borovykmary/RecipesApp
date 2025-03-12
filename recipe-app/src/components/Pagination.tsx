@@ -2,47 +2,23 @@ import React from "react";
 
 interface PaginationProps {
   currentPage: number;
-  totalPages: number;
+  visiblePages: (number | string)[];
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
   onPageChange: (page: number) => void;
+  onNextPage: () => void;
+  onPreviousPage: () => void;
 }
 
 export function Pagination({
   currentPage,
-  totalPages,
+  visiblePages,
+  hasNextPage,
+  hasPreviousPage,
   onPageChange,
+  onNextPage,
+  onPreviousPage,
 }: PaginationProps) {
-  const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-
-    if (totalPages <= 7) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-
-    pages.push(1);
-
-    if (currentPage > 3) {
-      pages.push("...");
-    }
-
-    for (
-      let i = Math.max(2, currentPage - 2);
-      i <= Math.min(totalPages - 1, currentPage + 2);
-      i++
-    ) {
-      pages.push(i);
-    }
-
-    if (currentPage < totalPages - 2) {
-      pages.push("...");
-    }
-
-    if (totalPages > 1) {
-      pages.push(totalPages);
-    }
-
-    return pages;
-  };
-
   return (
     <div
       style={{
@@ -53,23 +29,23 @@ export function Pagination({
       }}
     >
       <button
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
+        onClick={onPreviousPage}
+        disabled={!hasPreviousPage}
         style={{
           padding: "8px 16px",
           backgroundColor: "rgba(255, 255, 255, 0.1)",
           border: "none",
           borderRadius: "8px",
           color: "white",
-          cursor: currentPage === 1 ? "not-allowed" : "pointer",
-          opacity: currentPage === 1 ? 0.5 : 1,
+          cursor: hasPreviousPage ? "pointer" : "not-allowed",
+          opacity: hasPreviousPage ? 1 : 0.5,
           transition: "all 0.2s ease-in-out",
         }}
       >
         ←
       </button>
 
-      {getPageNumbers().map((page, index) =>
+      {visiblePages.map((page, index) =>
         typeof page === "number" ? (
           <button
             key={index}
@@ -104,16 +80,16 @@ export function Pagination({
       )}
 
       <button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
+        onClick={onNextPage}
+        disabled={!hasNextPage}
         style={{
           padding: "8px 16px",
           backgroundColor: "rgba(255, 255, 255, 0.1)",
           border: "none",
           borderRadius: "8px",
           color: "white",
-          cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-          opacity: currentPage === totalPages ? 0.5 : 1,
+          cursor: hasNextPage ? "pointer" : "not-allowed",
+          opacity: hasNextPage ? 1 : 0.5,
           transition: "all 0.2s ease-in-out",
         }}
       >

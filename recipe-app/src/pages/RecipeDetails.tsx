@@ -7,16 +7,145 @@ import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import LayersIcon from "@mui/icons-material/Layers";
 import LanguageIcon from "@mui/icons-material/Language";
 import YouTubeIcon from "@mui/icons-material/YouTube";
+import { IngredientsList } from "../components/IngredientsList";
+
+const styles = {
+  heading: {
+    fontSize: "3rem",
+    marginBottom: "16px",
+    color: "white",
+    fontFamily: "Playfair Display, serif",
+  },
+  categories: {
+    display: "flex",
+    gap: "12px",
+    color: "var(--color-gray-300)",
+    fontSize: "1.125rem",
+  },
+  content: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1.5fr",
+    gap: "48px",
+    alignItems: "start",
+  },
+  imageContainer: {
+    position: "sticky" as const,
+    top: "100px",
+  },
+  image: {
+    width: "100%",
+    borderRadius: "16px",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+  },
+  details: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "48px",
+  },
+  sectionHeading: {
+    fontSize: "1.5rem",
+    marginBottom: "16px",
+    color: "var(--color-primary)",
+    fontFamily: "Playfair Display, serif",
+  },
+  instructions: {
+    color: "var(--color-gray-300)",
+    lineHeight: "1.6",
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "16px",
+  },
+  videoContainer: {
+    position: "relative" as const,
+    paddingBottom: "56.25%", // 16:9 aspect ratio
+    height: 0,
+    overflow: "hidden",
+    borderRadius: "16px",
+  },
+  selectButton: {
+    padding: "12px 24px",
+    backgroundColor: "var(--color-primary)",
+    color: "var(--color-secondary)",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "1rem",
+    fontWeight: 500,
+    cursor: "pointer",
+    transition: "all 0.2s ease-in-out",
+  },
+  selectedButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    color: "white",
+  },
+  backButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    background: "none",
+    border: "none",
+    color: "var(--color-primary)",
+    fontSize: "1rem",
+    fontWeight: 500,
+    cursor: "pointer",
+    padding: "0",
+    marginBottom: "32px",
+    transition: "transform 0.2s ease-in-out",
+  },
+  categoryBadge: {
+    backgroundColor: "var(--color-primary)",
+    color: "var(--color-secondary)",
+    padding: "6px 12px",
+    borderRadius: "4px",
+    fontSize: "0.875rem",
+    fontWeight: 500,
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+  },
+  areaBadge: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    color: "white",
+    padding: "6px 12px",
+    borderRadius: "4px",
+    fontSize: "0.875rem",
+    fontWeight: 500,
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+    backdropFilter: "blur(4px)",
+  },
+  youtubeButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    backgroundColor: "var(--color-primary)",
+    color: "var(--color-secondary)",
+    padding: "12px 24px",
+    borderRadius: "8px",
+    textDecoration: "none",
+    fontWeight: 500,
+    transition: "transform 0.2s ease-in-out",
+    border: "none",
+    cursor: "pointer",
+  },
+};
 
 export function RecipeDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
   const [selectedRecipes, setSelectedRecipes] = useState<Set<string>>(() => {
     const saved = localStorage.getItem("selectedRecipes");
     return new Set(saved ? JSON.parse(saved) : []);
   });
 
-  const { data: recipe, isLoading } = useQuery({
+  const {
+    data: recipe,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["recipe", id],
     queryFn: () => api.getRecipeById(id!),
     enabled: !!id,
@@ -30,56 +159,20 @@ export function RecipeDetails() {
   }, [selectedRecipes]);
 
   const toggleRecipeSelection = (recipeId: string) => {
-    const newSelected = new Set(selectedRecipes);
-    if (newSelected.has(recipeId)) {
-      newSelected.delete(recipeId);
-    } else {
-      newSelected.add(recipeId);
-    }
-    setSelectedRecipes(newSelected);
+    setSelectedRecipes((prev) => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(recipeId)) {
+        newSelected.delete(recipeId);
+      } else {
+        newSelected.add(recipeId);
+      }
+      return newSelected;
+    });
   };
 
-  if (isLoading) {
-    return (
-      <>
-        <Navigation selectedRecipesCount={selectedRecipes.size} />
-        <main style={{ paddingTop: "80px" }}>
-          <div className="container">
-            <div style={{ padding: "48px 0" }}>
-              <div style={{ textAlign: "center", color: "white" }}>
-                Loading...
-              </div>
-            </div>
-          </div>
-        </main>
-      </>
-    );
-  }
-
-  if (!recipe) {
-    return (
-      <>
-        <Navigation selectedRecipesCount={selectedRecipes.size} />
-        <main style={{ paddingTop: "80px" }}>
-          <div className="container">
-            <div style={{ padding: "48px 0" }}>
-              <div style={{ textAlign: "center", color: "white" }}>
-                Recipe not found
-              </div>
-            </div>
-          </div>
-        </main>
-      </>
-    );
-  }
-
-  const ingredients = [];
-  for (let i = 1; i <= 20; i++) {
-    const ingredient = recipe[`strIngredient${i}` as keyof typeof recipe];
-    const measure = recipe[`strMeasure${i}` as keyof typeof recipe];
-    if (ingredient && ingredient.trim() !== "") {
-      ingredients.push({ ingredient, measure });
-    }
+  if (!id) {
+    navigate("/");
+    return null;
   }
 
   return (
@@ -87,270 +180,121 @@ export function RecipeDetails() {
       <Navigation selectedRecipesCount={selectedRecipes.size} />
       <main style={{ paddingTop: "80px" }}>
         <div className="container">
-          <div style={{ padding: "48px 0" }}>
-            <button
-              onClick={() => navigate(-1)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                background: "none",
-                border: "none",
-                color: "var(--color-primary)",
-                fontSize: "1rem",
-                fontWeight: 500,
-                cursor: "pointer",
-                padding: "0",
-                marginBottom: "32px",
-                transition: "transform 0.2s ease-in-out",
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = "translateX(-4px)";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = "none";
-              }}
-            >
-              <KeyboardBackspaceIcon />
-              Go Back
-            </button>
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : isError ? (
+            <div>Error loading recipe</div>
+          ) : recipe ? (
+            <div style={{ padding: "48px 0" }}>
+              <button
+                onClick={() => navigate(-1)}
+                style={styles.backButton}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateX(-4px)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "none";
+                }}
+              >
+                <KeyboardBackspaceIcon />
+                Go Back
+              </button>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1.5fr",
-                gap: "48px",
-                alignItems: "start",
-              }}
-            >
-              <div>
-                <img
-                  src={recipe.strMealThumb}
-                  alt={recipe.strMeal}
-                  style={{
-                    width: "100%",
-                    borderRadius: "16px",
-                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                  }}
-                />
+              <div style={{ marginBottom: "48px" }}>
+                <h1 style={styles.heading}>{recipe.strMeal}</h1>
                 <div
-                  style={{
-                    marginTop: "24px",
-                    display: "flex",
-                    gap: "12px",
-                    flexWrap: "wrap",
-                  }}
+                  style={{ display: "flex", alignItems: "center", gap: "16px" }}
                 >
-                  <div style={{ display: "flex", gap: "12px" }}>
-                    <div
-                      style={{
-                        backgroundColor: "var(--color-primary)",
-                        color: "var(--color-secondary)",
-                        padding: "6px 12px",
-                        borderRadius: "4px",
-                        fontSize: "0.875rem",
-                        fontWeight: 500,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                        maxWidth: "100px",
-                      }}
-                      title={recipe.strCategory}
-                    >
+                  <div style={styles.categories}>
+                    <div style={styles.categoryBadge}>
                       <LayersIcon sx={{ fontSize: 16 }} />
-                      <span
-                        style={{
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {recipe.strCategory}
-                      </span>
+                      <span>{recipe.strCategory}</span>
                     </div>
-                    <div
-                      style={{
-                        backgroundColor: "rgba(255, 255, 255, 0.15)",
-                        color: "white",
-                        padding: "6px 12px",
-                        borderRadius: "4px",
-                        fontSize: "0.875rem",
-                        fontWeight: 500,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                        backdropFilter: "blur(4px)",
-                      }}
-                    >
+                    <div style={styles.areaBadge}>
                       <LanguageIcon sx={{ fontSize: 16 }} />
-                      {recipe.strArea}
+                      <span>{recipe.strArea}</span>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              <div>
-                <div style={{ marginBottom: "16px" }}>
-                  <h1
-                    style={{
-                      fontSize: "3rem",
-                      marginBottom: "16px",
-                      color: "white",
-                      fontFamily: "Playfair Display, serif",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
-                      WebkitLineClamp: "2",
-                      WebkitBoxOrient: "vertical",
-                      lineHeight: 1.2,
-                    }}
-                    title={recipe.strMeal}
-                  >
-                    {recipe.strMeal}
-                  </h1>
                   <button
                     onClick={() => toggleRecipeSelection(recipe.idMeal)}
-                    className="button"
                     style={{
-                      padding: "8px 16px",
-                      backgroundColor: selectedRecipes.has(recipe.idMeal)
-                        ? "var(--color-primary)"
-                        : "rgba(255, 255, 255, 0.2)",
-                      color: selectedRecipes.has(recipe.idMeal)
-                        ? "var(--color-secondary)"
-                        : "white",
-                      fontSize: "0.875rem",
-                      border: "none",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease-in-out",
-                      backdropFilter: "blur(4px)",
+                      ...styles.selectButton,
+                      ...(selectedRecipes.has(recipe.idMeal)
+                        ? styles.selectedButton
+                        : {}),
                     }}
                   >
-                    {selectedRecipes.has(recipe.idMeal) ? "Selected" : "Select"}
+                    {selectedRecipes.has(recipe.idMeal)
+                      ? "Selected"
+                      : "Select Recipe"}
                   </button>
                 </div>
+              </div>
 
-                <div style={{ marginBottom: "32px" }}>
-                  <h2
-                    style={{
-                      fontSize: "1.5rem",
-                      marginBottom: "16px",
-                      color: "var(--color-primary)",
-                      fontFamily: "Playfair Display, serif",
-                    }}
-                  >
-                    Instructions
-                  </h2>
-                  <p
-                    style={{
-                      color: "var(--color-gray-300)",
-                      lineHeight: "1.6",
-                      whiteSpace: "pre-line",
-                    }}
-                  >
-                    {recipe.strInstructions}
-                  </p>
+              <div style={styles.content}>
+                <div style={styles.imageContainer}>
+                  <img
+                    src={recipe.strMealThumb}
+                    alt={recipe.strMeal}
+                    style={styles.image}
+                  />
                 </div>
 
-                <div>
-                  <h2
-                    style={{
-                      fontSize: "1.5rem",
-                      marginBottom: "16px",
-                      color: "var(--color-primary)",
-                      fontFamily: "Playfair Display, serif",
-                    }}
-                  >
-                    Ingredients
-                  </h2>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns:
-                        "repeat(auto-fill, minmax(200px, 1fr))",
-                      gap: "16px",
-                    }}
-                  >
-                    {ingredients.map(({ ingredient, measure }, index) => (
-                      <div
-                        key={index}
-                        style={{
-                          backgroundColor: "rgba(255, 255, 255, 0.05)",
-                          padding: "16px",
-                          borderRadius: "8px",
-                          backdropFilter: "blur(4px)",
-                        }}
-                      >
-                        <div
-                          style={{
-                            color: "white",
-                            fontSize: "1rem",
-                            fontWeight: 500,
-                            marginBottom: "4px",
+                <div style={styles.details}>
+                  <section>
+                    <h2 style={styles.sectionHeading}>Ingredients</h2>
+                    <IngredientsList recipe={recipe} />
+                  </section>
+
+                  <section>
+                    <h2 style={styles.sectionHeading}>Instructions</h2>
+                    <div style={styles.instructions}>
+                      {recipe.strInstructions
+                        .split("\n")
+                        .map((step: string, index: number) => (
+                          <p key={index}>{step}</p>
+                        ))}
+                    </div>
+                  </section>
+
+                  {recipe.strYoutube && (
+                    <section>
+                      <h2 style={styles.sectionHeading}>Video Tutorial</h2>
+                      <div style={{ marginBottom: "16px" }}>
+                        <a
+                          href={recipe.strYoutube}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={styles.youtubeButton}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.transform =
+                              "translateY(-2px)";
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.transform = "none";
                           }}
                         >
-                          {ingredient}
-                        </div>
-                        <div
-                          style={{
-                            color: "var(--color-gray-400)",
-                            fontSize: "0.875rem",
-                          }}
-                        >
-                          {measure}
-                        </div>
+                          <YouTubeIcon />
+                          Watch on YouTube
+                        </a>
                       </div>
-                    ))}
-                  </div>
+                      <div style={styles.videoContainer}>
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          src={recipe.strYoutube.replace("watch?v=", "embed/")}
+                          title="Recipe video tutorial"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        ></iframe>
+                      </div>
+                    </section>
+                  )}
                 </div>
-
-                {recipe.strYoutube && (
-                  <div style={{ marginTop: "32px" }}>
-                    <h2
-                      style={{
-                        fontSize: "1.5rem",
-                        marginBottom: "16px",
-                        color: "var(--color-primary)",
-                        fontFamily: "Playfair Display, serif",
-                      }}
-                    >
-                      Video Tutorial
-                    </h2>
-                    <a
-                      href={recipe.strYoutube}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        backgroundColor: "var(--color-primary)",
-                        color: "var(--color-secondary)",
-                        padding: "12px 24px",
-                        borderRadius: "8px",
-                        textDecoration: "none",
-                        fontWeight: 500,
-                        transition: "transform 0.2s ease-in-out",
-                      }}
-                      onMouseOver={(e) =>
-                        ((e.target as HTMLElement).style.transform =
-                          "translateY(-2px)")
-                      }
-                      onMouseOut={(e) =>
-                        ((e.target as HTMLElement).style.transform = "none")
-                      }
-                    >
-                      <YouTubeIcon />
-                      Watch on YouTube
-                    </a>
-                  </div>
-                )}
               </div>
             </div>
-          </div>
+          ) : null}
         </div>
       </main>
     </>
