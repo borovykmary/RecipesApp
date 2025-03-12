@@ -21,6 +21,8 @@ const styles = {
     display: "flex",
     gap: "12px",
     marginTop: "24px",
+    position: "relative" as const,
+    zIndex: 2,
   },
   content: {
     display: "grid",
@@ -32,6 +34,7 @@ const styles = {
     display: "flex",
     flexDirection: "column" as const,
     gap: "24px",
+    position: "relative" as const,
   },
   rightColumn: {
     display: "flex",
@@ -41,6 +44,7 @@ const styles = {
   imageContainer: {
     position: "sticky" as const,
     top: "100px",
+    zIndex: 1,
   },
   image: {
     width: "100%",
@@ -73,19 +77,23 @@ const styles = {
     borderRadius: "16px",
   },
   selectButton: {
-    padding: "12px 24px",
-    backgroundColor: "var(--color-primary)",
-    color: "var(--color-secondary)",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "8px 16px",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    color: "white",
     border: "none",
     borderRadius: "8px",
-    fontSize: "1rem",
+    fontSize: "0.875rem",
     fontWeight: 500,
     cursor: "pointer",
     transition: "all 0.2s ease-in-out",
+    backdropFilter: "blur(4px)",
   },
   selectedButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    color: "white",
+    backgroundColor: "var(--color-primary)",
+    color: "var(--color-secondary)",
   },
   backButton: {
     display: "flex",
@@ -245,7 +253,7 @@ export function RecipeDetails() {
                     >
                       {selectedRecipes.has(recipe.idMeal)
                         ? "Selected"
-                        : "Select Recipe"}
+                        : "Select"}
                     </button>
                   </div>
 
